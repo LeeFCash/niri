@@ -66,7 +66,7 @@ input {
 
     // Focus windows and outputs automatically when moving the mouse into them.
     // Setting max-scroll-amount="0%" makes it work only on windows already fully on screen.
-     focus-follows-mouse max-scroll-amount="0%"
+     focus-follows-mouse max-scroll-amount="100%"
 }
 
 // You can configure outputs by their name, which you can find
@@ -75,6 +75,8 @@ input {
 // Find more information on the wiki:
 // https://yalter.github.io/niri/Configuration:-Outputs
 // Remember to uncomment the node by removing "/-"!
+//
+// niri msg outputs // command to get info
 /-output "eDP-1" {
     // Uncomment this line to disable this output.
     // off
@@ -104,6 +106,10 @@ input {
     // If the position is unset or results in an overlap, the output is instead placed
     // automatically.
     position x=1280 y=0
+}
+/-output "PNP(ONN)" {
+	mode "1920x1080 @ 60.000 Hz"
+	scale 1
 }
 
 // Settings that influence how windows are positioned and sized.
@@ -375,6 +381,15 @@ binds {
     Mod+T hotkey-overlay-title="Open a Terminal: alacritty" { spawn "alacritty"; }
     Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
+
+    // move the mouse
+    Mod+Alt+Left { spawn "wlrctl" "pointer" "move" "-5" "0"; }
+    Mod+Alt+Right { spawn "wlrctl" "pointer" "move"  "5" "0"; }
+    Mod+Alt+Up   { spawn "wlrctl" "pointer" "move"  "0" "-5"; }
+    Mod+Alt+Down { spawn "wlrctl" "pointer" "move"  "0"  "5"; }
+    //
+    Mod+Alt+Return { spawn "wlrctl" "pointer" "click" "left"; }
+    Mod+Alt+Shift+Return { spawn "wlrctl" "pointer" "click" "right"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
     // Note: the entire command goes as a single argument. It's passed verbatim to `sh -c`.
