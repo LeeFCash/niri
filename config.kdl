@@ -286,7 +286,7 @@ layout {
 spawn-at-startup "waybar"
 spawn-at-startup "mako"
 spawn-at-startup "xwayland-satellite"// for xwayland only/apps
-spawn-at-startup "swaybg" "-i" "~/Pictures/wallpaper/ken_kaneki.jpg"// if I ever want to have wallpaper
+spawn-at-startup "swaybg" "-i" "/home/leecash/Pictures/wallpaper/ken_kaneki.jpg"// if I ever want to have wallpaper
 
 // To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
 // spawn-sh-at-startup "qs -c ~/source/qs/MyAwesomeShell"
@@ -405,6 +405,16 @@ binds {
     XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-"; }
     XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
     XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
+    //Mod+S { spawn "sh" "-c" "wpctl set-volume @DEFAULT_AUDIO_SINK@ \"$(shuf -i 1-5 -n 1)%+\""; }
+/*    Mod+S { spawn "sh" "-c" "
+	    if [ $((RANDOM % 2)) -eq 0 ]; then
+                wpctl set-volume @DEFAULT_AUDIO_SINK@ \"$(shuf -i 1-5 -n 1)%+\";
+            else
+                wpctl set-volume @DEFAULT_AUDIO_SINK@ \"$(shuf -i 1-5 -n 1)%-\";
+            fi
+        "; }*/
+// random stuff        |-----------------|
+    Mod+S allow-when-locked=true { spawn "sh" "-c" "wpctl set-volume @DEFAULT_AUDIO_SINK@ \"$(shuf -i 0-100 -n 1)%\""; }
 
     // Example brightness key mappings for brightnessctl.
     // You can use regular spawn with multiple arguments too (to avoid going through "sh"),
