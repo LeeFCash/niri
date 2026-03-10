@@ -126,7 +126,7 @@ layout {
     // - "always", the focused column will always be centered.
     // - "on-overflow", focusing a column will center it if it doesn't fit
     //   together with the previously focused column.
-    center-focused-column "always"
+    center-focused-column "on-overflow"
 //    center-focused-column "never"
 
     // You can customize the widths that "switch-preset-column-width" (Mod+R) toggles between.
@@ -405,16 +405,41 @@ binds {
     XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-"; }
     XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
     XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
-    //Mod+S { spawn "sh" "-c" "wpctl set-volume @DEFAULT_AUDIO_SINK@ \"$(shuf -i 1-5 -n 1)%+\""; }
-/*    Mod+S { spawn "sh" "-c" "
-	    if [ $((RANDOM % 2)) -eq 0 ]; then
-                wpctl set-volume @DEFAULT_AUDIO_SINK@ \"$(shuf -i 1-5 -n 1)%+\";
-            else
-                wpctl set-volume @DEFAULT_AUDIO_SINK@ \"$(shuf -i 1-5 -n 1)%-\";
-            fi
-        "; }*/
 // random stuff        |-----------------|
     Mod+S allow-when-locked=true { spawn "sh" "-c" "wpctl set-volume @DEFAULT_AUDIO_SINK@ \"$(shuf -i 0-100 -n 1)%\""; }
+    Mod+A                        { spawn "sh" "-c" "
+	R=$((RANDOM % 101))
+	
+	if [ ${R} -lt $((RANDOM % 101 )) ]; then
+		if [ ${R} -lt $((RANDOM % 101 )) ]; then
+			xdg-open https://mail.google.com/mail/u/0/#inbox
+		elif [ ${R} -lt $((RANDOM % 101 )) ]; then
+			xdg-open https://outlook.cloud.microsoft/mail/
+		elif [ ${R} -lt $((RANDOM % 101 )) ]; then
+			xdg-open https://web.fluxer.app/channels/@me
+		elif [ ${R} -lt $((RANDOM % 101 )) ]; then
+			appimage-run ~/AppImages/fluxer-stable-0.0.8-x86_64.AppImage
+		elif [ ${R} -lt $((RANDOM % 101 )) ]; then
+			xdg-open https://www.textnow.com/messaging
+		fi
+
+	elif [ ${R} -lt $((RANDOM % 101 )) ]; then
+		if [ ${R} -lt $((RANDOM % 101 )) ]; then
+			xdg-open https://www.youtube.com/feed/subscriptions
+		elif [ ${R} -lt $((RANDOM % 101 )) ]; then
+			steam
+		elif [ ${R} -lt $((RANDOM % 101 )) ]; then
+			xdg-open https://www.chattanoogastate.edu/
+		fi
+
+	elif [ ${R} -lt $((RANDOM % 101 )) ]; then
+		if [ ${R} -lt $((RANDOM % 101 )) ]; then
+			xdg-open https://bsky.app/profile/lonelyleecash.bsky.social
+		elif [ ${R} -lt $((RANDOM % 101 )) ]; then
+			xdg-open https://flathub.org/en
+		fi
+	fi
+"; }
 
     // Example brightness key mappings for brightnessctl.
     // You can use regular spawn with multiple arguments too (to avoid going through "sh"),
@@ -567,6 +592,16 @@ binds {
 
     // Switches focus between the current and the previous workspace.
     // Mod+Tab { focus-workspace-previous; }
+/*    Mod+Tab { spawn "sh" "-c" "
+        ID=$(niri msg -j windows | jq \".[].id\" | shuf -n 1)
+        niri msg action focus-window \"$ID\"
+    ";
+}*/
+    Mod+Tab { spawn "sh" "-c" "
+	ID=$(niri msg -j windows | jq \".[].id\" | shuf -n 1)
+	niri msg action focus-window --id \"$ID\"
+    ";
+}
 
     // The following binds move the focused window in and out of a column.
     // If the window is alone, they will consume it into the nearby column to the side.
@@ -579,13 +614,32 @@ binds {
     // Expel the bottom window from the focused column to the right.
     Mod+Period { expel-window-from-column; }
 
-    Mod+R { switch-preset-column-width; }
-    // Cycling through the presets in reverse order is also possible.
-    // Mod+R { switch-preset-column-width-back; }
-    Mod+Shift+R { switch-preset-window-height; }
+//    Mod+R { switch-preset-column-width; }
+//    Mod+Shift+R { switch-preset-window-height; }
+	Mod+Alt+R { spawn "sh" "-c" "niri msg action set-column-width $((RANDOM % 101))%"; }// my random window size Left to Right 
+	Mod+Shift+R { spawn "sh" "-c" "niri msg action set-window-height $((RANDOM % 101))%"; }
+	Mod+R { spawn "sh" "-c" "
+		R=$((RANDOM % 101))
+		W=$((RANDOM % 101))
+		H=$((RANDOM % 101))
+		if [ $((R % 2)) -eq 0 ]; then
+			niri msg action set-column-width ${R}%;
+			niri msg action set-window-height ${R}%
+		else
+			niri msg action set-column-width ${W}%;
+			niri msg action set-window-height ${H}%;
+		fi
+	"; }
+    /* Cycling through the presets in reverse order is also possible.
+    Mod+R { switch-preset-column-width-back; } */
     Mod+Ctrl+R { reset-window-height; }
     Mod+F { maximize-column; }
     Mod+Shift+F { fullscreen-window; }
+    Mod+P { spawn "sh" "-c" "
+	R=$((RANDOM % 179))
+	notify-send \"${R} is around how many minutes\\nyou have until power off. \"
+	sleep ${R}m; shutdown
+    ";}
 
     // Expand the focused column to space not taken up by other fully visible columns.
     // Makes the column "fill the rest of the space".
