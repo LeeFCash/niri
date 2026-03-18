@@ -407,39 +407,62 @@ binds {
     XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
 // random stuff        |-----------------|
     Mod+S allow-when-locked=true { spawn "sh" "-c" "wpctl set-volume @DEFAULT_AUDIO_SINK@ \"$(shuf -i 0-100 -n 1)%\""; }
-    Mod+A                        { spawn "sh" "-c" "
-	R=$((RANDOM % 101))
-	
-	if [ ${R} -lt $((RANDOM % 101 )) ]; then
-		if [ ${R} -lt $((RANDOM % 101 )) ]; then
-			xdg-open https://mail.google.com/mail/u/0/#inbox
-		elif [ ${R} -lt $((RANDOM % 101 )) ]; then
-			xdg-open https://outlook.cloud.microsoft/mail/
-		elif [ ${R} -lt $((RANDOM % 101 )) ]; then
-			xdg-open https://web.fluxer.app/channels/@me
-		elif [ ${R} -lt $((RANDOM % 101 )) ]; then
-			appimage-run ~/AppImages/fluxer-stable-0.0.8-x86_64.AppImage
-		elif [ ${R} -lt $((RANDOM % 101 )) ]; then
-			xdg-open https://www.textnow.com/messaging
-		fi
+    Mod+Shift+A                        { spawn "sh" "-c" "
+	items=(
+		\"Gmail\"
+		\"outlookMail\"
+		\"webFluxer\"
+		\"AppImageFluxer\"
+		\"textnow\"
+		\"discordptb\"
+		\"youtubeSubscriptions\"
+		\"steam\"
+		\"chattanoogastateWebsite\"
+		\"blueSky\"
+		\"flathub\"
+		\"messenger\"
+		\"brave\"
+	)
 
-	elif [ ${R} -lt $((RANDOM % 101 )) ]; then
-		if [ ${R} -lt $((RANDOM % 101 )) ]; then
-			xdg-open https://www.youtube.com/feed/subscriptions
-		elif [ ${R} -lt $((RANDOM % 101 )) ]; then
-			steam
-		elif [ ${R} -lt $((RANDOM % 101 )) ]; then
-			xdg-open https://www.chattanoogastate.edu/
-		fi
+	index=$((RANDOM % ${#items[@]}))
 
-	elif [ ${R} -lt $((RANDOM % 101 )) ]; then
-		if [ ${R} -lt $((RANDOM % 101 )) ]; then
-			xdg-open https://bsky.app/profile/lonelyleecash.bsky.social
-		elif [ ${R} -lt $((RANDOM % 101 )) ]; then
-			xdg-open https://flathub.org/en
-		fi
-	fi
+	choice=\"${items[$index]}\"
+
+	notify-send \"🎲 Random pick: $choice\"
+
+	echo \"$choice\" > /tmp/random.txt
 "; }
+    Mod+A                        { spawn "sh" "-c" "
+	if grep -qx \"Gmail\" /tmp/random.txt; then
+		xdg-open https://mail.google.com/mail/u/0/#inbox
+	elif grep -qx \"outlookMail\" /tmp/random.txt; then
+		xdg-open https://outlook.cloud.microsoft/mail/
+	elif grep -qx \"webFluxer\" /tmp/random.txt; then
+		xdg-open https://web.fluxer.app/channels/@me
+	elif grep -qx \"AppImageFluxer\" /tmp/random.txt; then
+		appimage-run ~/AppImages/fluxer-stable-0.0.8-x86_64.AppImage
+	elif grep -qx \"textnow\" /tmp/random.txt; then
+		xdg-open https://www.textnow.com/messaging
+	elif grep -qx \"discordptb\" /tmp/random.txt; then
+		discordptb
+	elif grep -qx \"youtubeSubscriptions\" /tmp/random.txt; then
+		xdg-open https://www.youtube.com/feed/subscriptions
+	elif grep -qx \"steam\" /tmp/random.txt; then
+		steam
+	elif grep -qx \"chattanoogastateWebsite\" /tmp/random.txt; then
+		xdg-open https://www.chattanoogastate.edu/
+	elif grep -qx \"blueSky\" /tmp/random.txt; then
+		xdg-open https://bsky.app/profile/lonelyleecash.bsky.social
+	elif grep -qx \"flathub\" /tmp/random.txt; then
+		xdg-open https://flathub.org/en
+	elif grep -qx \"messenger\" /tmp/random.txt; then
+		xdg-open https://www.messenger.com/new
+	elif grep -qx \"brave\" /tmp/random.txt; then
+		brave
+	else
+		notify-send \"Did not find a match\"
+	fi
+    "; }
 
     // Example brightness key mappings for brightnessctl.
     // You can use regular spawn with multiple arguments too (to avoid going through "sh"),
@@ -597,9 +620,17 @@ binds {
         niri msg action focus-window \"$ID\"
     ";
 }*/
+/*INFO2=$(niri msg -j windows | jq -r '.[] | select(.id == '"$ID"') | \"\(.app_id) - \(.title)\"')*/
+    Mod+Shift+Tab { spawn "sh" "-c" "
+	ID=$(niri msg -j windows | jq -r \".[].id\" | shuf -n 1)
+	INFO=$(niri msg -j windows | jq -r \".[] | select(.id == $ID) | .app_id\")
+	notify-send \"${ID} and ${INFO}\"
+	echo \"$ID\" > /tmp/random.txt
+    ";
+}
     Mod+Tab { spawn "sh" "-c" "
-	ID=$(niri msg -j windows | jq \".[].id\" | shuf -n 1)
-	niri msg action focus-window --id \"$ID\"
+	R=$(cat /tmp/random.txt)
+	niri msg action focus-window --id \"${R}\"
     ";
 }
 
@@ -635,11 +666,30 @@ binds {
     Mod+Ctrl+R { reset-window-height; }
     Mod+F { maximize-column; }
     Mod+Shift+F { fullscreen-window; }
-    Mod+P { spawn "sh" "-c" "
+
+Mod+Shift+P { spawn "sh" "-c" "
 	R=$((RANDOM % 179))
-	notify-send \"${R} is around how many minutes\\nyou have until power off. \"
-	sleep ${R}m; shutdown
-    ";}
+
+	choice=\"${R}\"
+
+	notify-send \"🎲 Random pick: ${R} minutes\"
+
+	echo \"${R}\" > /tmp/random.txt
+"; }
+/*niri validate     commend to help find problem */
+Mod+P { spawn "sh" "-c" "
+	if [ ! -f /tmp/random.txt ]; then
+		notify-send \"No timer selected\"
+		exit
+	fi
+
+	R=$(cat /tmp/random.txt)
+
+	notify-send \"${R} is around how many minutes\nyou have until power off.\"
+
+	sleep ${R}m
+	shutdown
+"; }
 
     // Expand the focused column to space not taken up by other fully visible columns.
     // Makes the column "fill the rest of the space".
@@ -702,5 +752,5 @@ binds {
 
     // Powers off the monitors. To turn them back on, do any input like
     // moving the mouse or pressing any other key.
-    Mod+Shift+P { power-off-monitors; }
+    Mod+Alt+P { power-off-monitors; }
 }
